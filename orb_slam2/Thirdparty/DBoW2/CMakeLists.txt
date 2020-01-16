@@ -22,5 +22,5 @@ set(SRCS_DUTILS
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${dbow2_ROOR_DIR}/lib)
 
-add_library(DBoW2 SHARED ${SRCS_DBOW2} ${SRCS_DUTILS})
+add_library(DBoW2 STATIC ${SRCS_DBOW2} ${SRCS_DUTILS})
 target_link_libraries(DBoW2 ${OpenCV_LIBS})

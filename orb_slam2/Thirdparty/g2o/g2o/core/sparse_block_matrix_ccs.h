@@ -122,7 +122,7 @@ namespace g2o {
             const SparseMatrixBlock* a = it->block;
             int srcOffset = rowBaseOfBlock(it->row);
             // destVec += *a.transpose() * srcVec (according to the sub-vector parts)
-            internal::atxpy(*a, srcVec, srcOffset, destVec, destOffset);
+            internal::template atxpy<typename SparseBlockMatrix<MatrixType>::SparseMatrixBlock>(*a, srcVec, srcOffset, destVec, destOffset);
           }
         }
       }
@@ -223,7 +223,11 @@ namespace g2o {
       //! rows of the matrix
       int rows() const {return _rowBlockIndices.size() ? _rowBlockIndices.back() : 0;}
 
+#ifdef _MSC_VER
+      typedef std::unordered_map<int, MatrixType*> SparseColumn;
+#else
       typedef std::tr1::unordered_map<int, MatrixType*> SparseColumn;
+#endif
 
       SparseBlockMatrixHashMap(const std::vector<int>& rowIndices, const std::vector<int>& colIndices) :
         _rowBlockIndices(rowIndices), _colBlockIndices(colIndices)

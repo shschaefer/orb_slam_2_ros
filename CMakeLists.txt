@@ -6,13 +6,9 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF()
 
 # Check for c++11 support
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-IF(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-ELSE()
-  MESSAGE(ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-ENDIF()
+# TODO: This should be target specific, not general as it will pollute the compile environment
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/orb_slam2/cmake_modules)
 
@@ -38,6 +34,10 @@ endif()
 
 find_package(Eigen3 3.1.0 REQUIRED)
 
+# map serialization addition - library boost serialization 
+message(STATUS "Compile With map save/load function")
+find_package(Boost REQUIRED COMPONENTS serialization)
+
 set (DYNAMIC_RECONFIGURE_PATH ros/config/dynamic_reconfigure.cfg)
 execute_process(COMMAND chmod a+x ${DYNAMIC_RECONFIGURE_PATH}
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -52,14 +52,15 @@ generate_dynamic_reconfigure_options(
 set(LIBS_ORBSLAM
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
-${PROJECT_SOURCE_DIR}/orb_slam2/Thirdparty/DBoW2/lib/libDBoW2.so
-${PROJECT_SOURCE_DIR}/orb_slam2/Thirdparty/g2o/lib/libg2o.so
+DBoW2
+g2o
 )
 
 set(LIBS_ROS
-${PROJECT_SOURCE_DIR}/orb_slam2/lib/lib${PROJECT_NAME}.so
+${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${catkin_LIBRARIES}
+${Boost_LIBRARIES}
 )
 
 add_service_files(
@@ -74,7 +75,7 @@ generate_messages(
 
 catkin_package (
   CATKIN_DEPENDS roscpp rospy std_msgs cv_bridge image_transport tf sensor_msgs dynamic_reconfigure message_runtime
-  LIBRARIES {PROJECT_NAME} libDBoW2 libg2o
+  LIBRARIES ${PROJECT_NAME} DBoW2 g2o
 )
 
 include_directories(
@@ -109,19 +110,9 @@ orb_slam2/src/KeyFrameDatabase.cc
 orb_slam2/src/Sim3Solver.cc
 orb_slam2/src/Initializer.cc
 )
+
 add_dependencies (${PROJECT_NAME} g2o DBoW2)
-
-target_link_libraries(${PROJECT_NAME}
-${LIBS_ORBSLAM}
-)
-
-# map serialization addition - library boost serialization 
-message(STATUS "Compile With map save/load function")
-find_library(BOOST_SERIALIZATION boost_serialization)
-if (NOT BOOST_SERIALIZATION)
-    message(FATAL_ERROR "Can't find libboost_serialization")
-endif()
-target_link_libraries(${PROJECT_NAME} ${BOOST_SERIALIZATION})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${LIBS_ORBSLAM})
 
 add_executable (${PROJECT_NAME}_mono
 ros/src/MonoNode.cc
@@ -147,7 +138,7 @@ add_executable (${PROJECT_NAME}_rgbd
 ros/src/RGBDNode.cc
 ros/src/Node.cc
 )
-add_dependencies (${PROJECT_NAME}_rgbd ${PROJECT_NAME} ${PROJECT_NAME}_gencfg)
+add_dependencies (${PROJECT_NAME}_rgbd ${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 target_link_libraries(${PROJECT_NAME}_rgbd
 ${LIBS_ROS}

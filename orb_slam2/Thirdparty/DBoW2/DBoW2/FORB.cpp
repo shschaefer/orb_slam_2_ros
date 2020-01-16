@@ -13,7 +13,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#ifndef WIN32
 #include <stdint-gcc.h>
+#endif
 
 #include "FORB.h"
 

@@ -27,7 +27,9 @@
 
 #include "Thirdparty/DBoW2/DBoW2/FeatureVector.h"
 
+#ifndef _MSC_VER
 #include<stdint-gcc.h>
+#endif
 
 using namespace std;
 

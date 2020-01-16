@@ -1524,10 +1524,11 @@ bool TemplatedVocabulary<TDescriptor,F>::loadFromBinFile(const std::string &file
         unsigned char nIsLeafuc;
         f.read((char*)&nIsLeafuc,sizeof(nIsLeafuc));
         nIsLeaf=nIsLeafuc;
-        unsigned char array[F::L]; // the number of element is stored in F::L
-        f.read((char*)array,(long)F::L);
+        unsigned char *array = new unsigned char[F::L]; // the number of element is stored in F::L
+        f.read((char *)array,(long)F::L);
         m_nodes[nid].descriptor.create(1, F::L, CV_8U);
-        F::fromArray8U(m_nodes[nid].descriptor,(unsigned char *)array);
+        F::fromArray8U(m_nodes[nid].descriptor,array);
+        delete(array);
         f.read((char*)&m_nodes[nid].weight,sizeof(m_nodes[nid].weight));
         if(nIsLeaf>0)
         {
@@ -1569,10 +1570,11 @@ void TemplatedVocabulary<TDescriptor,F>::saveToBinFile(const std::string &filena
             f.write((const char*)& one ,sizeof( one ));
         else
             f.write((const char*)& zero ,sizeof( zero ));
-        unsigned char array[F::L]; // the number of elements is stored in F::L
-        F::toArray8U(node.descriptor,(unsigned char *)array);
-        f.write((char*)array,(long)F::L);
+        unsigned char *array = new unsigned char[F::L]; // the number of element is stored in F::L
+        F::toArray8U(node.descriptor,array);
+        f.write((char *)array,(long)F::L);
         f.write((const char*)& node.weight ,sizeof( node.weight ));
+        delete(array);
     }
     f.close();
 }

@@ -74,7 +74,11 @@ namespace g2o {
     protected:
       double _delta;
   };
+#ifdef _MSC_VER
+  typedef std::shared_ptr<RobustKernel> RobustKernelPtr;
+#else
   typedef std::tr1::shared_ptr<RobustKernel> RobustKernelPtr;
+#endif
 
 } // end namespace g2o
 

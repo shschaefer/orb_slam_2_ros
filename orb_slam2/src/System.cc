@@ -497,7 +497,7 @@ std::vector<MapPoint*> System::GetAllMapPoints() {
   return mpMap->GetAllMapPoints();
 }
 
-
+#ifndef _MSC_VER
 bool System::SetCallStackSize (const rlim_t kNewStackSize) {
     struct rlimit rlimit;
     int operation_result;
@@ -538,7 +538,7 @@ rlim_t System::GetCurrentCallStackSize () {
 
     return rlimit.rlim_cur;
 }
-
+#endif
 
 void System::ActivateLocalizationMode()
 {
@@ -577,12 +577,14 @@ bool System::SaveMap(const string &filename) {
         return false;
     }
 
+#ifndef _MSC_VER
     const rlim_t kNewStackSize = 64L * 1024L * 1024L;   // min stack size = 64 Mb
     const rlim_t kDefaultCallStackSize = GetCurrentCallStackSize();
     if (!SetCallStackSize(kNewStackSize)) {
         std::cerr << "Error changing the call stack size; Aborting" << std::endl;
         return false;
     }
+#endif
 
     try {
         std::cout << "saving map file: " << map_file << std::flush;
@@ -593,15 +595,21 @@ bool System::SaveMap(const string &filename) {
         out.close();
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
+#ifndef _MSC_VER
         SetCallStackSize(kDefaultCallStackSize);
+#endif
         return false;
     } catch (...) {
         std::cerr << "Unknows exeption" << std::endl;
+#ifndef _MSC_VER
         SetCallStackSize(kDefaultCallStackSize);
+#endif
         return false;
     }
 
+#ifndef _MSC_VER
     SetCallStackSize(kDefaultCallStackSize);
+#endif
     return true;
 }
 
@@ -614,12 +622,14 @@ bool System::LoadMap(const string &filename) {
         return false;
     }
 
+#ifndef _MSC_VER
     const rlim_t kNewStackSize = 64L * 1024L * 1024L;   // min stack size = 64 Mb
     const rlim_t kDefaultCallStackSize = GetCurrentCallStackSize();
     if (!SetCallStackSize(kNewStackSize)) {
         std::cerr << "Error changing the call stack size; Aborting" << std::endl;
         return false;
     }
+#endif
 
     std::cout << "Loading map file: " << map_file << std::flush;
     boost::archive::binary_iarchive ia(in, boost::archive::no_header);
@@ -646,8 +656,10 @@ bool System::LoadMap(const string &filename) {
     std::cout << " ... done" << std::endl;
     in.close();
 
+#ifndef _MSC_VER
     SetCallStackSize(kDefaultCallStackSize);
-    
+#endif
+
     return true;
 }
 

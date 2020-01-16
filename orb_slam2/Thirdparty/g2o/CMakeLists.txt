@@ -1,6 +1,6 @@
 set (g2o_SOURCE_DIR "${PROJECT_SOURCE_DIR}/orb_slam2/Thirdparty/g2o")
 
-SET (G2O_LIB_TYPE SHARED)
+SET (G2O_LIB_TYPE STATIC)
 
 # There seems to be an issue with MSVC8
 # see http://eigen.tuxfamily.org/bz/show_bug.cgi?id=83

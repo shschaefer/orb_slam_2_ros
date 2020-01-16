@@ -31,6 +31,9 @@
 #include "../stuff/misc.h"
 #include "optimization_algorithm_property.h"
 
+#ifdef _MSC_VER
+#include <algorithm>
+#endif
 #include <list>
 #include <iostream>
 #include <typeinfo>
